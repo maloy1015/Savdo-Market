@@ -41,5 +41,5 @@ urlpatterns = [
     path("api/", include(router.urls)),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Media fayllarni har doim xizmat qilish (Render uchun ham)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

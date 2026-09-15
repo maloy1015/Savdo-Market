@@ -10,9 +10,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-change-this-key")
 DEBUG = config("DEBUG", default=True, cast=bool)
 
+# --- ALLOWED_HOSTS ---
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=Csv())
 RENDER_EXTERNAL_HOSTNAME = config("RENDER_EXTERNAL_HOSTNAME", default="")
-if RENDER_EXTERNAL_HOSTNAME:
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 INSTALLED_APPS = [
@@ -157,16 +158,14 @@ SIMPLE_JWT = {
 }
 
 # ---------------- CORS ----------------
-# Bu yerga Render frontend URL'ini qo'shishni unutmang
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:5173,http://127.0.0.1:5173",
     cast=Csv(),
 )
 
-# Render'dagi frontend manzilini avtomatik qo'shish (agar env'da ko'rsatilsa)
 FRONTEND_URL = config("FRONTEND_URL", default="")
-if FRONTEND_URL:
+if FRONTEND_URL and FRONTEND_URL not in CORS_ALLOWED_ORIGINS:
     CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
 
 CORS_ALLOW_CREDENTIALS = True
@@ -178,6 +177,8 @@ CSRF_TRUSTED_ORIGINS = config(
     cast=Csv(),
 )
 if RENDER_EXTERNAL_HOSTNAME:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
-if FRONTEND_URL:
+    origin = f"https://{RENDER_EXTERNAL_HOSTNAME}"
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+if FRONTEND_URL and FRONTEND_URL not in CSRF_TRUSTED_ORIGINS:
     CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)

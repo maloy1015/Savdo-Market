@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Render build skripti
 set -o errexit
 
 pip install -r requirements.txt
