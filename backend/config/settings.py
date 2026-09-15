@@ -79,9 +79,10 @@ USE_POSTGRES = config("USE_POSTGRES", default=False, cast=bool)
 DATABASE_URL = config("DATABASE_URL", default="")
 
 if DATABASE_URL:
-    # Render (yoki boshqa hosting) avtomatik beradigan DATABASE_URL
     DATABASES = {
-        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG)
+        "default": dj_database_url.parse(
+            DATABASE_URL, conn_max_age=600, ssl_require=not DEBUG
+        )
     }
 elif USE_POSTGRES:
     DATABASES = {
@@ -95,14 +96,12 @@ elif USE_POSTGRES:
         }
     }
 else:
-    # Tezkor lokal ishlash uchun SQLite (PostgreSQL o'rnatilmagan bo'lsa)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-
 
 AUTH_USER_MODEL = "users.User"
 
@@ -157,13 +156,22 @@ SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
 
+# ---------------- CORS ----------------
+# Bu yerga Render frontend URL'ini qo'shishni unutmang
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:5173,http://127.0.0.1:5173",
     cast=Csv(),
 )
+
+# Render'dagi frontend manzilini avtomatik qo'shish (agar env'da ko'rsatilsa)
+FRONTEND_URL = config("FRONTEND_URL", default="")
+if FRONTEND_URL:
+    CORS_ALLOWED_ORIGINS.append(FRONTEND_URL)
+
 CORS_ALLOW_CREDENTIALS = True
 
+# ---------------- CSRF ----------------
 CSRF_TRUSTED_ORIGINS = config(
     "CSRF_TRUSTED_ORIGINS",
     default="http://localhost:5173,http://127.0.0.1:5173",
@@ -171,3 +179,5 @@ CSRF_TRUSTED_ORIGINS = config(
 )
 if RENDER_EXTERNAL_HOSTNAME:
     CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+if FRONTEND_URL:
+    CSRF_TRUSTED_ORIGINS.append(FRONTEND_URL)
