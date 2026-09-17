@@ -1,20 +1,41 @@
+# backend/config/admin.py
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import User, Address
+from django.contrib.auth.models import Group
+from django.contrib.sessions.models import Session
+from django.contrib.admin.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
+
+# Django'ning keraksiz modellarini admin panelda ko'rsatmaslik
+try:
+    admin.site.unregister(Group)
+except admin.sites.NotRegistered:
+    pass
+
+try:
+    admin.site.unregister(Session)
+except admin.sites.NotRegistered:
+    pass
+
+try:
+    admin.site.unregister(LogEntry)
+except admin.sites.NotRegistered:
+    pass
+
+try:
+    admin.site.unregister(ContentType)
+except admin.sites.NotRegistered:
+    pass
+
+# Agar simplejwt token blacklist ishlatilsa:
+try:
+    from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
+    admin.site.unregister(OutstandingToken)
+    admin.site.unregister(BlacklistedToken)
+except (ImportError, admin.sites.NotRegistered):
+    pass
 
 
-@admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    list_display = ("id", "username", "email", "phone", "is_staff", "is_online", "date_joined")
-    list_filter = ("is_staff", "is_active", "is_online")
-    search_fields = ("username", "email", "phone")
-    fieldsets = BaseUserAdmin.fieldsets + (
-        ("Qo'shimcha", {"fields": ("phone", "avatar", "is_online", "last_seen")}),
-    )
-
-
-@admin.register(Address)
-class AddressAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "region", "city", "district", "is_default", "created_at")
-    search_fields = ("user__username", "region", "city")
-    list_filter = ("region", "is_default")
+# Admin panel sarlavhalari
+admin.site.site_header = "Savdo Market — Boshqaruv paneli"
+admin.site.site_title = "Savdo Market Admin"
+admin.site.index_title = "Boshqaruv paneliga xush kelibsiz"
